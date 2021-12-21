@@ -1,6 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from geopy.point import Point
+from typing import List
 
 class DepthControlMode(Enum):
     """An Enum representing the depth control mode"""
@@ -93,3 +94,19 @@ class WayPoint:
         """Returns the target point (latitude, longitude, altitude) of the WayPoint"""
         #TODO: compute target altitude
         return Point(latitude=self.Latitude, longitude=self.Longitude, altitude=None)
+
+
+@dataclass
+class Mission:
+    """
+    A class used to represent a Hugin mission.
+    Corresponds to the content of one .mp mission file.
+    """
+    filename: str = None
+    header: List[str] = None
+    mission:  List[WayPoint] = None
+
+    @property
+    def length(self):
+        """Returns the length of the mission (number of WayPoints)"""
+        return 0 if not self.mission else len(self.mission)
