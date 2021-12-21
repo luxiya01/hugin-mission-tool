@@ -47,9 +47,9 @@ class WayPoint:
     DMo: DepthControlMode Enum
         Indicates the depth control mode.
     Latitude: str
-        Target latitude of the WayPoint.
+        Target latitude of the WayPoint, given in DDM (degrees decimal minutes)
     Longitude: str
-        Target longitude of the WayPoint.
+        Target longitude of the WayPoint, given in DDM (degrees decimal minutes).
     Course: float
         Target course/heading (orientation of the AUV relative to North (0 degree)).
         Automatically computed heading, as opposed to user-specified heading, is given in
@@ -90,10 +90,33 @@ class WayPoint:
     Dist: float = None
     Flags: str = None
 
-    def get_position(self) -> Point:
+    @property
+    def position(self) -> Point:
         """Returns the target point (latitude, longitude, altitude) of the WayPoint"""
         #TODO: compute target altitude
-        return Point(latitude=self.Latitude, longitude=self.Longitude, altitude=None)
+        return Point(latitude=self.latitude_in_dd, longitude=self.longitude_in_dd,
+                     altitude=None)
+
+    @property
+    def latitude_in_dd(self) -> float:
+        """Returns the target latitude in degrees decimal"""
+        return WayPoint.degree_minutes_to_degree_decimals(self.Latitude)
+
+    @property
+    def longitude_in_dd(self) -> float:
+        """Returns the target longitude in degrees decimal"""
+        return WayPoint.degree_minutes_to_degree_decimals(self.Longitude)
+
+    @classmethod
+    def degree_minutes_to_degree_decimals(cls, ddm_str):
+        """Convert a DDM string to DD format. Used to convert longitude and latitude"""
+        degrees, minutes_str = ddm_str.split(':')
+        degrees_dd = int(degrees) + float(minutes_str[:-1])/60
+
+        direction = minutes_str[-1]
+        if direction in ('S', 'W'):
+            degrees_dd *= -1
+        return degrees_dd
 
 
 @dataclass
@@ -104,9 +127,10 @@ class Mission:
     """
     filename: str = None
     header: List[str] = None
+    #TODO: compute longitude and latitude from other waypoint data when they show up as None
     mission:  List[WayPoint] = None
 
     @property
-    def length(self):
+    def length(self) -> int:
         """Returns the length of the mission (number of WayPoints)"""
         return 0 if not self.mission else len(self.mission)

@@ -114,6 +114,7 @@ class MissionParser:
             return float(attr_value)
 
         if attr_name in ['Depth', 'Alt', 'RPM', 'Speed']:
+            #TODO: handle knot in Speed!
             return float(attr_value)
         if attr_name == 'DMo':
             return cls._parse_mode(attr_value, mode=DepthControlMode)
