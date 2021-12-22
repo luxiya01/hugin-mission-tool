@@ -2,6 +2,8 @@ from enum import Enum
 from dataclasses import dataclass
 from geopy.point import Point
 from typing import List
+from datetime import datetime, timedelta
+
 
 class DepthControlMode(Enum):
     """An Enum representing the depth control mode"""
@@ -11,6 +13,7 @@ class DepthControlMode(Enum):
     ALTITUDE = 'A'
     DEADBANDALTITUDE = 'B'
 
+
 class GuidanceMode(Enum):
     """An Enum representing the guidance control mode"""
     WAYPOINT = 'W'
@@ -19,10 +22,12 @@ class GuidanceMode(Enum):
     HEADING = 'H'
     CIRCLE = 'S'
 
+
 class SpeedControlMode(Enum):
     """An Enum representing the speed control mode"""
     RPM = 'R'
     SPEED = 'S'
+
 
 @dataclass
 class WayPoint:
@@ -94,7 +99,8 @@ class WayPoint:
     def position(self) -> Point:
         """Returns the target point (latitude, longitude, altitude) of the WayPoint"""
         #TODO: compute target altitude
-        return Point(latitude=self.latitude_in_dd, longitude=self.longitude_in_dd,
+        return Point(latitude=self.latitude_in_dd,
+                     longitude=self.longitude_in_dd,
                      altitude=None)
 
     @property
@@ -111,7 +117,7 @@ class WayPoint:
     def degree_minutes_to_degree_decimals(cls, ddm_str):
         """Convert a DDM string to DD format. Used to convert longitude and latitude"""
         degrees, minutes_str = ddm_str.split(':')
-        degrees_dd = int(degrees) + float(minutes_str[:-1])/60
+        degrees_dd = int(degrees) + float(minutes_str[:-1]) / 60
 
         direction = minutes_str[-1]
         if direction in ('S', 'W'):
@@ -128,9 +134,31 @@ class Mission:
     filename: str = None
     header: List[str] = None
     #TODO: compute longitude and latitude from other waypoint data when they show up as None
-    mission:  List[WayPoint] = None
+    mission: List[WayPoint] = None
 
     @property
     def length(self) -> int:
         """Returns the length of the mission (number of WayPoints)"""
         return 0 if not self.mission else len(self.mission)
+
+    @property
+    def cumulative_mission_time(self) -> List[float]:
+        """Returns the cumulative time at each mission WayPoint in seconds"""
+        mission_time = [0]  #cumulative time reaching the first WayPoint
+        if self.mission is not None:
+            for m in self.mission:
+                mission_time.append(mission_time[-1] + m.Dur)
+        return mission_time
+
+    def compute_mission_timestamps(self,
+                                   start_time: datetime = None
+                                   ) -> List[datetime]:
+        """Given a mission start_time, returns a list of datetime where timestamps[i]
+        corresponds to the datetime when the ith WayPoint will be reached."""
+        if not start_time:
+            start_time = datetime.now()
+        timestamps = [
+            start_time + timedelta(seconds=t)
+            for t in self.cumulative_mission_time
+        ]
+        return timestamps

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from data import Mission, WayPoint, DepthControlMode, GuidanceMode, SpeedControlMode
 
+
 class MissionParser:
     """A class used to parse Hugin mission .mp files"""
     header_line_idx = 5
@@ -17,7 +18,6 @@ class MissionParser:
             print(x)
         return cls._parse_content(filename, lines)
 
-
     @classmethod
     def parse_file(cls, filename):
         """Parse .mp file"""
@@ -30,7 +30,8 @@ class MissionParser:
         """Parse string content into a mission. Returns a Mission object."""
 
         mission = Mission(filename=filename, mission=[])
-        header = cls._parse_line_content(lines[cls.header_line_idx], is_header=True)
+        header = cls._parse_line_content(lines[cls.header_line_idx],
+                                         is_header=True)
         mission.header = header
 
         comment = ''
@@ -41,7 +42,9 @@ class MissionParser:
             if line[0] == '#':
                 comment = line[1:]
             else:
-                waypoint = cls._parse_waypoint(line, header, comment=comment,
+                waypoint = cls._parse_waypoint(line,
+                                               header,
+                                               comment=comment,
                                                prev_waypoint=prev_waypoint)
 
                 # Reset comment and update mission and prev_waypoint
@@ -49,7 +52,6 @@ class MissionParser:
                 mission.mission.append(waypoint)
                 prev_waypoint = waypoint
         return mission
-
 
     @classmethod
     def _parse_line_content(cls, line, is_header=False):
@@ -61,7 +63,6 @@ class MissionParser:
         content = [no_, tag]
         content.extend(parts[1:])
         return content
-
 
     @classmethod
     def _parse_waypoint(cls, line, header, comment='', prev_waypoint=None):
@@ -88,7 +89,6 @@ class MissionParser:
             setattr(waypoint, attr_name, attr)
         return waypoint
 
-
     @classmethod
     def _parse_attr(cls, attr_name, attr_value, prev_waypoint=None):
         """Parse a string attribute taken from one line in the .mp file"""
@@ -98,6 +98,8 @@ class MissionParser:
             return getattr(prev_waypoint, attr_name)
 
         if attr_value == '-':
+            if attr_name in ['Dur', 'Dist']:
+                return 0
             return None
 
         if attr_name == 'No' and attr_value == '':
@@ -123,7 +125,6 @@ class MissionParser:
         if attr_name == 'SMo':
             return cls._parse_mode(attr_value, mode=SpeedControlMode)
         return None
-
 
     @classmethod
     def _parse_mode(cls, attr_value, mode):
