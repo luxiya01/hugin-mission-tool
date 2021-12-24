@@ -1,0 +1,120 @@
+affine==2.3.0
+argon2-cffi==20.1.0
+astroid @ file:///tmp/build/80754af9/astroid_1639044221066/work
+async-generator==1.10
+attrs==21.2.0
+backcall==0.2.0
+bleach==4.0.0
+Brotli==1.0.9
+certifi==2021.10.8
+cffi==1.14.6
+click==8.0.3
+click-plugins==1.1.1
+cligj==0.7.2
+cmocean==2.0
+colorspacious==1.1.2
+cycler==0.10.0
+daal==2021.5.1
+daal4py==2021.5.1
+dash==2.0.0
+dash-core-components==2.0.0
+dash-extensions==0.0.65
+dash-html-components==2.0.0
+dash-leaflet==0.1.23
+dash-table==5.0.0
+debugpy==1.4.1
+decorator==5.0.9
+defusedxml==0.7.1
+EditorConfig==0.12.3
+entrypoints==0.3
+Fiona==1.8.20
+Flask==2.0.2
+Flask-Caching==1.10.1
+Flask-Compress==1.10.1
+GDAL==3.0.2
+geobuf==1.1.1
+geographiclib==1.52
+geopandas==0.10.2
+geopy==2.2.0
+gunicorn==20.1.0
+ipykernel==6.1.0
+ipython @ file:///tmp/build/80754af9/ipython_1635944169458/work
+ipython-genutils==0.2.0
+ipywidgets==7.6.3
+iris==1.0.7
+isort @ file:///tmp/build/80754af9/isort_1628603791788/work
+itsdangerous==2.0.1
+jedi==0.18.0
+Jinja2==3.0.1
+joblib @ file:///tmp/build/80754af9/joblib_1635411271373/work
+jsbeautifier==1.14.0
+jsonschema==3.2.0
+jupyter-client @ file:///tmp/build/80754af9/jupyter_client_1637148478538/work
+jupyter-core @ file:///tmp/build/80754af9/jupyter_core_1636537028672/work
+jupyterlab-pygments==0.1.2
+jupyterlab-widgets==1.0.0
+kiwisolver==1.3.2
+lazy-object-proxy @ file:///tmp/build/80754af9/lazy-object-proxy_1616529027849/work
+MarkupSafe==2.0.1
+matplotlib==3.4.3
+matplotlib-inline==0.1.2
+mccabe==0.6.1
+mistune==0.8.4
+mkl-fft==1.3.1
+mkl-random @ file:///tmp/build/80754af9/mkl_random_1626186066731/work
+mkl-service==2.4.0
+more-itertools==8.12.0
+munch==2.5.0
+nbclient==0.5.3
+nest-asyncio==1.5.1
+numpy==1.21.2
+packaging==21.0
+pandas==1.3.4
+pandocfilters==1.4.3
+parso==0.8.2
+pexpect @ file:///tmp/build/80754af9/pexpect_1605563209008/work
+pickleshare==0.7.5
+Pillow==8.4.0
+platformdirs @ file:///tmp/build/80754af9/platformdirs_1638968569495/work
+plotly==5.4.0
+prometheus-client==0.11.0
+prompt-toolkit==3.0.19
+protobuf==3.19.1
+ptyprocess==0.7.0
+pycparser==2.20
+Pygments==2.9.0
+pylint @ file:///tmp/build/80754af9/pylint_1639650598590/work
+pyparsing==2.4.7
+pyproj==3.3.0
+pyrsistent==0.18.0
+python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+pytz==2021.3
+pyzmq==22.2.1
+QtPy==1.9.0
+rasterio==1.2.10
+rioxarray==0.9.0
+scikit-learn @ file:///tmp/build/80754af9/scikit-learn_1635187048948/work
+scikit-learn-intelex==2021.5.1
+scipy==1.7.1
+seaborn==0.11.2
+Send2Trash==1.8.0
+Shapely==1.8.0
+six @ file:///tmp/build/80754af9/six_1623709665295/work
+snuggs==1.4.7
+tbb==2021.4.0
+tenacity==8.0.1
+terminado==0.11.0
+testpath==0.5.0
+threadpoolctl @ file:///Users/ktietz/demo/mc3/conda-bld/threadpoolctl_1629802263681/work
+toml @ file:///tmp/build/80754af9/toml_1616166611790/work
+tornado==6.1
+traitlets==5.0.5
+typing-extensions @ file:///tmp/build/80754af9/typing_extensions_1631814937681/work
+viscm==0.9
+wcwidth==0.2.5
+webencodings==0.5.1
+Werkzeug==2.0.2
+widgetsnbextension==3.5.1
+wrapt @ file:///tmp/build/80754af9/wrapt_1638433857881/work
+xarray==0.20.2
+yapf==0.31.0
