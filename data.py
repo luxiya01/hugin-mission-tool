@@ -116,6 +116,8 @@ class WayPoint:
     @classmethod
     def degree_minutes_to_degree_decimals(cls, ddm_str):
         """Convert a DDM string to DD format. Used to convert longitude and latitude"""
+        if ddm_str is None:
+            return None
         degrees, minutes_str = ddm_str.split(':')
         degrees_dd = int(degrees) + float(minutes_str[:-1]) / 60
 
@@ -144,9 +146,10 @@ class Mission:
     @property
     def cumulative_mission_time(self) -> List[float]:
         """Returns the cumulative time at each mission WayPoint in seconds"""
-        mission_time = [0]  #cumulative time reaching the first WayPoint
+        mission_time = []  #cumulative time reaching the first WayPoint
         if self.mission is not None:
-            for m in self.mission:
+            mission_time.append(self.mission[0].Dur)
+            for m in self.mission[1:]:
                 mission_time.append(mission_time[-1] + m.Dur)
         return mission_time
 
