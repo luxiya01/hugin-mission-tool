@@ -9,6 +9,7 @@ import pandas as pd
 from app_components import upload_mission_file_component, map_plot_component, mission_starttime_input
 
 app = dash.Dash()
+server = app.server
 app.layout = html.Div([
     upload_mission_file_component(id='upload-mission-file'),
     mission_starttime_input(
