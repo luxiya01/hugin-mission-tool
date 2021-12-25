@@ -35,10 +35,20 @@ def update_map_plot(n_clicks, contents, filename, date, time):
 
     start_time = datetime.datetime.strptime(time_str, time_fmt)
 
+    error_div = html.Div([
+        html.B(
+            f'The selected file "{filename}" is not a valid .mp mission file!',
+            style={'color': 'red'})
+    ])
+
     if contents is not None:
-        content_type, content_str = contents.split(',')
-        m = MissionParser.parse_upload(filename=filename,
-                                       content_str=content_str)
+        _, content_str = contents.split(',')
+        try:
+            m = MissionParser.parse_upload(filename=filename,
+                                           content_str=content_str)
+        except Exception as e:
+            return error_div, time_div
+
         df = pd.DataFrame(m.mission)
         df['lat'] = [x.latitude_in_dd for x in m.mission]
         df['lon'] = [x.longitude_in_dd for x in m.mission]

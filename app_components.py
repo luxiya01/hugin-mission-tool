@@ -4,19 +4,20 @@ import datetime
 
 
 def upload_mission_file_component(id='upload-mission-file'):
-    return dcc.Upload(id=id,
-                      children=['Drag and Drop or ',
-                                html.A('Select Files')],
-                      style={
-                          'width': '80%',
-                          'height': '20%',
-                          'lineHeight': '60px',
-                          'borderWidth': '1px',
-                          'borderStyle': 'dashed',
-                          'borderRadius': '5px',
-                          'textAlign': 'center',
-                          'margin': '10px'
-                      })
+    return dcc.Upload(
+        id=id,
+        children=['Drag and Drop or ',
+                  html.A('Select a Mission File (.mp)')],
+        style={
+            'width': '80%',
+            'height': '20%',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'textAlign': 'center',
+            'margin': '10px'
+        })
 
 
 def map_plot_component(df, filename, id='map-plot'):
