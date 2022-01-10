@@ -1,4 +1,6 @@
 from dash import html, dcc
+import dash_leaflet as dl
+import dash_bootstrap_components as dbc
 import plotly.express as px
 import datetime
 
@@ -61,11 +63,16 @@ def mission_starttime_input(
     time = datetime.datetime.now()
 
     return html.Div(children=[
-        html.H5('Choose mission start time: \t', style={'margin': '5px'}),
-        dcc.DatePickerSingle(id=id[0],
-                             date=time.date(),
-                             display_format='YYYY-MM-DD'),
-        dcc.Input(id=id[1], type='text', value=time.strftime('%H:%M')),
-        html.Button(id=id[2], children='Submit')
-    ],
-                    style={'display': 'flex'})
+        dbc.Col(html.H5('Choose mission start time: \t',
+                        style={'margin': '5px'}),
+                width=12),
+        dbc.Row([
+            dbc.Col(dcc.DatePickerSingle(
+                id=id[0], date=time.date(), display_format='YYYY-MM-DD'),
+                    width=2),
+            dbc.Col(dcc.Input(
+                id=id[1], type='text', value=time.strftime('%H:%M')),
+                    width=2),
+            dbc.Col(html.Button(id=id[2], children='Submit'), width=1)
+        ])
+    ])

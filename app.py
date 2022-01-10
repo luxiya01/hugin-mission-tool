@@ -1,22 +1,33 @@
 import dash
 from dash import html
+import dash_bootstrap_components as dbc
+import dash_leaflet as dl
 from dash.dependencies import Input, Output, State
 from mission_parser import MissionParser
 import datetime
 
 import pandas as pd
 
-from app_components import upload_mission_file_component, map_plot_component, mission_starttime_input
+from app_components import (upload_mission_file_component, map_plot_component,
+                            mission_starttime_input, map_component)
 
-app = dash.Dash()
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 app.layout = html.Div([
-    upload_mission_file_component(id='upload-mission-file'),
-    mission_starttime_input(
-        id=['mission-start-date', 'mission-start-time', 'mission-time-submit'
+    html.H2('Utility tool for Hugin missions'),
+    dbc.Tabs([
+        dbc.Tab([
+            upload_mission_file_component(id='upload-mission-file'),
+            mission_starttime_input(id=[
+                'mission-start-date', 'mission-start-time',
+                'mission-time-submit'
             ]),
-    html.Div(id='selected-datetime-text'),
-    html.Div(id='map-plot-div')
+            html.Div(id='selected-datetime-text'),
+            html.Div(id='map-plot-div')
+        ],
+                label='Mission Visualizer'),
+        dbc.Tab([html.H5('TMP text')], label='utilities')
+    ])
 ])
 
 
@@ -63,4 +74,4 @@ def update_map_plot(n_clicks, contents, filename, date, time):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, dev_tools_props_check=False)
+    app.run_server(debug=True)  #, dev_tools_props_check=False)
