@@ -28,7 +28,7 @@ def upload_mission_file_component(
     ])
 
 
-def map_component(id=['map', 'geojson', 'polyline']):
+def map_component(id=['map', 'geojson', 'polyline', 'map-callback-layer']):
     point_to_layer = assign(
         "function(feature, latlng, context) {return L.circleMarker(latlng);}")
     return html.Div(dl.Map(children=[
@@ -69,10 +69,12 @@ def map_component(id=['map', 'geojson', 'polyline']):
         dl.GeoJSON(data=None,
                    id=id[1],
                    options=dict(pointToLayer=point_to_layer)),
-        dl.Polyline(positions=[[0, 0], [0, 0]], id=id[2])
+        dl.Polyline(positions=[[0, 0], [0, 0]], id=id[2]),
+        dl.LayerGroup(id=id[3]),
+        dl.LayerGroup(id='geojson-callback-layer')
     ],
-                           zoom=3,
-                           center=(-60, -70),
+                           zoom=1,
+                           center=(0, 0),
                            id=id[0]),
                     style={'height': '100vh'},
                     id='map-div')
