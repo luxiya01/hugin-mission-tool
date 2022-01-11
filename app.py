@@ -12,11 +12,15 @@ import numpy as np
 
 from app_components import (upload_mission_file_component,
                             mission_starttime_input, map_component)
+from data import WayPoint
 
 app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.BOOTSTRAP],
                 prevent_initial_callbacks=True)
 server = app.server
+
+#TODO: remove global variable for holding mission...
+CURRENT_MISSION = None
 
 #TODO: move id assignments to a components_id.py const file
 app.layout = html.Div([
@@ -50,6 +54,8 @@ def mission_file_to_dataframe(contents, filename, start_time, time_fmt):
     except Exception as e:
         return None
 
+    global CURRENT_MISSION
+    CURRENT_MISSION = m
     df = pd.DataFrame(m.mission)
     df['lat'] = [x.latitude_in_dd for x in m.mission]
     df['lon'] = [x.longitude_in_dd for x in m.mission]
@@ -112,6 +118,13 @@ def update_map_plot(n_clicks, contents, filename, date, time,
 def geojson_callback(n_clicks, click_feature):
     print(f'clicked feature: {click_feature}')
     lon, lat = click_feature['geometry']['coordinates']
+    global CURRENT_MISSION
+    CURRENT_MISSION.mission.append(
+        WayPoint(Latitude=WayPoint.degree_decimals_to_degree_minutes(
+            lat, is_lat=True),
+                 Longitude=WayPoint.degree_decimals_to_degree_minutes(
+                     lon, is_lat=False)))
+    print(f'current mission length: {CURRENT_MISSION.length}')
     return [
         dl.CircleMarker(center=[lat, lon],
                         children=dl.Tooltip("{}".format(click_feature)),
