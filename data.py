@@ -1,9 +1,10 @@
 from enum import Enum
 from dataclasses import dataclass
+from geopy import distance
 from geopy.point import Point
 from typing import List
 from datetime import datetime, timedelta
-from math import floor
+from numpy import floor, ceil, arctan2, rad2deg
 
 
 class DepthControlMode(Enum):
@@ -184,3 +185,69 @@ class Mission:
             for t in self.cumulative_mission_time
         ]
         return timestamps
+
+    def add_waypoint(self,
+                     lat: float,
+                     lon: float,
+                     index: int,
+                     comment='',
+                     tag='',
+                     flags='') -> None:
+        """Add a Waypoint by giving a new (Lat, Lon) value, the waypoint will be added behind
+        the exisiting Waypoint with index. If No is None, append the new waypoint to the end of
+        the mission. Note that this method assumes that the vehicle is in speed control mode,
+        i.e. it computes the Duration based on the Distance and the current speed."""
+        prev_waypoint = self.mission[index]
+        new_lat_str = WayPoint.degree_decimals_to_degree_minutes(lat)
+        new_lon_str = WayPoint.degree_decimals_to_degree_minutes(lon)
+
+        dst_latlon = (lat, lon)
+        src_latlon = (prev_waypoint.latitude_in_dd,
+                      prev_waypoint.longitude_in_dd)
+        distance_in_m = distance.distance(dst_latlon, src_latlon).km * 1000
+        # Compute duration
+        current_speed = prev_waypoint.Speed
+        duration = ceil(distance_in_m / current_speed)
+        # Compute course
+        #TODO: debug compute course!
+        course = 0  #Mission.compute_course(src_latlon, dst_latlon)
+
+        new_waypoint = WayPoint(No=index,
+                                Comment=comment,
+                                Tag=tag,
+                                Depth=prev_waypoint.Depth,
+                                Alt=prev_waypoint.Altitude,
+                                DMo=prev_waypoint.DMo,
+                                Latitude=new_lat_str,
+                                Longitude=new_lon_str,
+                                Course=course,
+                                GMo=prev_waypoint.GMo,
+                                RPM=prev_waypoint.RPM,
+                                Speed=prev_waypoint.Speed,
+                                SMo=prev_waypoint.SMo,
+                                Dur=duration,
+                                Dist=distance_in_m,
+                                Flags=flags)
+        self.mission.insert(index, new_waypoint)
+        self._increment_waypoint_No(insert_index=index)
+
+    def _increment_waypoint_No(self, insert_index: int) -> None:
+        for waypoint in self.mission[insert_index + 1:]:
+            waypoint.No += 1
+
+    @classmethod
+    def compute_course(
+        cls, src_latlon: (float, float), dst_latlon: (float, float)) -> float:
+        """Assumes src_latlon and dst_latlon are given in (latitude, longitude).
+        Return the course in degrees."""
+        #TODO: debug compute_course method!
+        adjacent_src_dst = distance.distance((dst_latlon[0], src_latlon[1]),
+                                             src_latlon).km
+        if adjacent_src_dst == 0:
+            return 0
+
+        hypothenus_src_dst = distance.distance(
+            dst_latlon, (dst_latlon[0], src_latlon[1])).km
+        course_in_rad = arctan2(hypothenus_src_dst, adjacent_src_dst)
+        course_in_degree = rad2deg(course_in_rad)
+        return course_in_degree
