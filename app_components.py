@@ -54,26 +54,10 @@ def map_component(id=['map', 'geojson']):
                          id=id[0]),
         dl.GeoJSON(data=None, id=id[1])
     ],
-                           zoom=2),
+                           zoom=1,
+                           center=(-60, -70)),
                     style={'height': '100vh'},
-                    id='map-component')
-
-
-def map_plot_component(df, filename, id='map-plot'):
-    fig = px.line_geo(data_frame=df,
-                      lat='lat',
-                      lon='lon',
-                      text='No',
-                      hover_name='No',
-                      hover_data=['reaching_time', 'Comment'],
-                      color='reached')
-    fig.update_geos(fitbounds='locations',
-                    lataxis_showgrid=True,
-                    lonaxis_showgrid=True)
-    fig.update_traces(textposition='top center')
-    fig.update_layout(height=800, width=1000, title=filename)
-
-    return dcc.Graph(figure=fig, id=id)
+                    id='map-div')
 
 
 def slider_component(df, id='slider'):

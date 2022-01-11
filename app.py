@@ -9,7 +9,7 @@ import datetime
 
 import pandas as pd
 
-from app_components import (upload_mission_file_component, map_plot_component,
+from app_components import (upload_mission_file_component,
                             mission_starttime_input, map_component)
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -34,17 +34,19 @@ app.layout = html.Div([
 
 
 @app.callback(Output('selected-datetime-text', 'children'),
-              Output('geojson', 'data'),
+              Output('geojson', 'data'), Output('map', 'center'),
               Input('mission-time-submit', 'n_clicks'),
               Input('upload-mission-file', 'contents'),
               State('upload-mission-file', 'filename'),
               State('mission-start-date', 'date'),
-              State('mission-start-time', 'value'))
-def update_map_plot(n_clicks, contents, filename, date, time):
+              State('mission-start-time', 'value'), State('map', 'center'))
+def update_map_plot(n_clicks, contents, filename, date, time,
+                    current_map_center):
     time_str = f'{date}, {time}'
     time_fmt = '%Y-%m-%d, %H:%M'
     time_div = html.H5(f'Selected mission start time: {time_str}')
     geojson_data = None
+    map_center = current_map_center
 
     start_time = datetime.datetime.strptime(time_str, time_fmt)
 
@@ -72,14 +74,15 @@ def update_map_plot(n_clicks, contents, filename, date, time):
         df = df[[
             'lat', 'lon', 'timestamp', 'reaching_time', 'reached', 'Comment'
         ]]
+        map_center = (df.lat.mean(), df.lon.mean())
         dicts = df.to_dict('rows')
         for item in dicts:
-            tooltip = f'Position: ({item["lat"]:.2f}, {item["lon"]:.2f})\nReaching time: {item["reaching_time"]}'
+            tooltip = f'Position: ({item["lat"]:.2f}, {item["lon"]:.2f})<br/>Reaching time: {item["reaching_time"]}'
             if item['Comment'] != '':
-                tooltip = f'{tooltip}\nComment: {item["Comment"]}'
+                tooltip = f'{tooltip}<br/>Comment: {item["Comment"]}'
             item['tooltip'] = tooltip
         geojson_data = dlx.dicts_to_geojson(dicts)
-    return time_div, geojson_data
+    return time_div, geojson_data, map_center
 
 
 if __name__ == '__main__':
