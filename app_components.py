@@ -50,6 +50,13 @@ def map_component(id=['map', 'geojson']):
                 maxZoom=13),
                        name='Bathymetry',
                        checked=True),
+            dl.Overlay(dl.GeoTIFFOverlay(url='./assets/20220107_MODIS.tiff'),
+                       name='MODIS',
+                       checked=False),
+            dl.Overlay(dl.GeoTIFFOverlay(
+                url='./assets/Antarctic_AMSR2_2022_01_09.tif'),
+                       name='AMSR2',
+                       checked=False),
         ],
                          id=id[0]),
         dl.GeoJSON(data=None, id=id[1])
