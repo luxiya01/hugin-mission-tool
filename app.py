@@ -2,6 +2,7 @@ import dash
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dl
+import dash_leaflet.express as dlx
 from dash.dependencies import Input, Output, State
 from mission_parser import MissionParser
 import datetime
@@ -23,7 +24,8 @@ app.layout = html.Div([
                 'mission-time-submit'
             ]),
             html.Div(id='selected-datetime-text'),
-            html.Div(id='map-plot-div')
+            html.Div(id='map-plot-div'),
+            map_component(id=['map', 'geojson'])
         ],
                 label='Mission Visualizer'),
         dbc.Tab([html.H5('TMP text')], label='utilities')
@@ -31,8 +33,8 @@ app.layout = html.Div([
 ])
 
 
-@app.callback(Output('map-plot-div', 'children'),
-              Output('selected-datetime-text', 'children'),
+@app.callback(Output('selected-datetime-text', 'children'),
+              Output('geojson', 'data'),
               Input('mission-time-submit', 'n_clicks'),
               Input('upload-mission-file', 'contents'),
               State('upload-mission-file', 'filename'),
@@ -42,7 +44,7 @@ def update_map_plot(n_clicks, contents, filename, date, time):
     time_str = f'{date}, {time}'
     time_fmt = '%Y-%m-%d, %H:%M'
     time_div = html.H5(f'Selected mission start time: {time_str}')
-    graph = None
+    geojson_data = None
 
     start_time = datetime.datetime.strptime(time_str, time_fmt)
 
@@ -67,10 +69,17 @@ def update_map_plot(n_clicks, contents, filename, date, time):
         df['reaching_time'] = [t.strftime(time_fmt) for t in df['timestamp']]
         df['reached'] = False
         df.loc[0, 'reached'] = True
-
-        graph = map_plot_component(df=df, id='map-plot', filename=filename)
-    return html.Div([html.Div(html.H5(f'Mission file: {filename}')),
-                     graph]), time_div
+        df = df[[
+            'lat', 'lon', 'timestamp', 'reaching_time', 'reached', 'Comment'
+        ]]
+        dicts = df.to_dict('rows')
+        for item in dicts:
+            tooltip = f'Position: ({item["lat"]:.2f}, {item["lon"]:.2f})\nReaching time: {item["reaching_time"]}'
+            if item['Comment'] != '':
+                tooltip = f'{tooltip}\nComment: {item["Comment"]}'
+            item['tooltip'] = tooltip
+        geojson_data = dlx.dicts_to_geojson(dicts)
+    return time_div, geojson_data
 
 
 if __name__ == '__main__':

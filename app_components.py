@@ -22,6 +22,43 @@ def upload_mission_file_component(id='upload-mission-file'):
         })
 
 
+def map_component(id=['map', 'geojson']):
+    return html.Div(dl.Map(children=[
+        dl.LayersControl([
+            dl.BaseLayer(dl.TileLayer(
+                url=
+                'https://maps.nbp.usap.gov/maptiles/osm-intl/{z}/{x}/{y}.png',
+                maxZoom=13),
+                         name='OpenStreetMap',
+                         checked=True)
+        ] + [
+            dl.Overlay(dl.TileLayer(
+                url=
+                'https://maps.nbp.usap.gov/maptiles/ocean_tiles/{z}/{y}/{x}.png',
+                maxZoom=13),
+                       name='Ocean Features Layer',
+                       checked=True),
+            dl.Overlay(dl.TileLayer(
+                url=
+                'https://maps.nbp.usap.gov/maptiles/label_tiles/{z}/{y}/{x}.png',
+                maxZoom=13),
+                       name='Labels Layer',
+                       checked=True),
+            dl.Overlay(dl.TileLayer(
+                url=
+                'https://maps.nbp.usap.gov/maptiles/Bathymetry/{z}/{x}/{y}.png',
+                maxZoom=13),
+                       name='Bathymetry',
+                       checked=True),
+        ],
+                         id=id[0]),
+        dl.GeoJSON(data=None, id=id[1])
+    ],
+                           zoom=2),
+                    style={'height': '100vh'},
+                    id='map-component')
+
+
 def map_plot_component(df, filename, id='map-plot'):
     fig = px.line_geo(data_frame=df,
                       lat='lat',
