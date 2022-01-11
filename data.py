@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from geopy.point import Point
 from typing import List
 from datetime import datetime, timedelta
+from math import floor
 
 
 class DepthControlMode(Enum):
@@ -114,7 +115,7 @@ class WayPoint:
         return WayPoint.degree_minutes_to_degree_decimals(self.Longitude)
 
     @classmethod
-    def degree_minutes_to_degree_decimals(cls, ddm_str):
+    def degree_minutes_to_degree_decimals(cls, ddm_str: str) -> float:
         """Convert a DDM string to DD format. Used to convert longitude and latitude"""
         if ddm_str is None:
             return None
@@ -125,6 +126,24 @@ class WayPoint:
         if direction in ('S', 'W'):
             degrees_dd *= -1
         return degrees_dd
+
+    @classmethod
+    def degree_decimals_to_degree_minutes(cls, dd: float, is_lat=True) -> str:
+        """Convert a DD float to DDM string"""
+        degrees = floor(abs(dd))
+        minutes = (abs(dd) - degrees) * 60
+
+        minutes_str = f'{minutes:.4f}'
+        # pad 0 if minutes < 10
+        if minutes < 10:
+            minutes_str = f'0{minutes:.4f}'
+
+        direction = ''
+        if is_lat:
+            direction = 'N' if dd > 0 else 'S'
+        else:
+            direction = 'E' if dd > 0 else 'W'
+        return f'{degrees}:{minutes_str}{direction}'
 
 
 @dataclass
