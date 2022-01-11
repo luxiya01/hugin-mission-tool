@@ -3,26 +3,34 @@ import dash_leaflet as dl
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import datetime
+from dash_extensions.javascript import assign
 
 
-def upload_mission_file_component(id='upload-mission-file'):
-    return dcc.Upload(
-        id=id,
-        children=['Drag and Drop or ',
-                  html.A('Select a Mission File (.mp)')],
-        style={
-            'width': '80%',
-            'height': '20%',
-            'lineHeight': '60px',
-            'borderWidth': '1px',
-            'borderStyle': 'dashed',
-            'borderRadius': '5px',
-            'textAlign': 'center',
-            'margin': '10px'
-        })
+def upload_mission_file_component(
+        id=['upload-mission-file', 'upload-mission-file-output']):
+    return html.Div(children=[
+        dcc.Upload(id=id[0],
+                   children=[
+                       'Drag and Drop or ',
+                       html.A('Select a Mission File (.mp)')
+                   ],
+                   style={
+                       'width': '80%',
+                       'height': '20%',
+                       'lineHeight': '60px',
+                       'borderWidth': '1px',
+                       'borderStyle': 'dashed',
+                       'borderRadius': '5px',
+                       'textAlign': 'center',
+                       'margin': '10px'
+                   }),
+        html.Div(id=id[1])
+    ])
 
 
-def map_component(id=['map', 'geojson']):
+def map_component(id=['map', 'geojson', 'polyline']):
+    point_to_layer = assign(
+        "function(feature, latlng, context) {return L.circleMarker(latlng);}")
     return html.Div(dl.Map(children=[
         dl.LayersControl([
             dl.BaseLayer(dl.TileLayer(
@@ -57,12 +65,15 @@ def map_component(id=['map', 'geojson']):
                 url='./assets/Antarctic_AMSR2_2022_01_09.tif'),
                        name='AMSR2',
                        checked=False),
-        ],
-                         id=id[0]),
-        dl.GeoJSON(data=None, id=id[1])
+        ]),
+        dl.GeoJSON(data=None,
+                   id=id[1],
+                   options=dict(pointToLayer=point_to_layer)),
+        dl.Polyline(positions=[[0, 0], [0, 0]], id=id[2])
     ],
-                           zoom=1,
-                           center=(-60, -70)),
+                           zoom=3,
+                           center=(-60, -70),
+                           id=id[0]),
                     style={'height': '100vh'},
                     id='map-div')
 
