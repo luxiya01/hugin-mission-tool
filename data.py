@@ -4,7 +4,7 @@ from geopy import distance
 from geopy.point import Point
 from typing import List
 from datetime import datetime, timedelta
-from numpy import floor, ceil, arctan2, rad2deg
+from numpy import floor, ceil, arctan2, rad2deg, cos, deg2rad
 
 
 class DepthControlMode(Enum):
@@ -209,8 +209,7 @@ class Mission:
         current_speed = prev_waypoint.Speed
         duration = ceil(distance_in_m / current_speed)
         # Compute course
-        #TODO: debug compute course!
-        course = 0  #Mission.compute_course(src_latlon, dst_latlon)
+        course = Mission.compute_course(src_latlon, dst_latlon)
 
         new_waypoint = WayPoint(No=index,
                                 Comment=comment,
@@ -238,16 +237,17 @@ class Mission:
     @classmethod
     def compute_course(
         cls, src_latlon: (float, float), dst_latlon: (float, float)) -> float:
-        """Assumes src_latlon and dst_latlon are given in (latitude, longitude).
+        """Assumes src_latlon and dst_latlon are given in (latitude, longitude)
+        and assume src_latlon and dst_latlon are close enough for locally flat
+        computations, where 1 degree latitude ~111km, 1 degree longitude
+        ~111km*cos(latitude).
         Return the course in degrees."""
-        #TODO: debug compute_course method!
-        adjacent_src_dst = distance.distance((dst_latlon[0], src_latlon[1]),
-                                             src_latlon).km
-        if adjacent_src_dst == 0:
-            return 0
-
-        hypothenus_src_dst = distance.distance(
-            dst_latlon, (dst_latlon[0], src_latlon[1])).km
-        course_in_rad = arctan2(hypothenus_src_dst, adjacent_src_dst)
+        lat_diff_in_km = (dst_latlon[0] - src_latlon[0]) * 111
+        lon_diff_in_km = (dst_latlon[1] - src_latlon[1]) * 111 * cos(
+            deg2rad(dst_latlon[0]))
+        course_in_rad = arctan2(lon_diff_in_km, lat_diff_in_km)
         course_in_degree = rad2deg(course_in_rad)
+
+        # Move then range from (-180, 180) to (0, 360)
+        course_in_degree = (course_in_degree + 360) % 360
         return course_in_degree
