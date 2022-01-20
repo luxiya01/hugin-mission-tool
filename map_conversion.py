@@ -12,14 +12,18 @@ def gdalwarp_polarview_jp2(source_file: str, output_file: str):
     ])
 
 
-def gdalwarp_AMSR2_seaice_concentration(source_file: str, output_file: str):
-    output = subprocess.run([
-        'gdalwarp', '-s_srs', 'EPSG:3412', '-t_srs', 'EPSG:4326', '-te',
-        '-180', '-90', '180', '90', source_file, output_file
-    ],
-                            capture_output=True)
-    print(f'source: {source_file},\n target: {output_file}')
-    print(output)
+def gdalwarp_AMSR2_seaice_concentration(source_file: str, output_file: str,
+                                        target_name: str):
+    if target_name == 'Antarctic_AMSR2':
+        subprocess.run([
+            'gdalwarp', '-s_srs', 'EPSG:3412', '-t_srs', 'EPSG:4326', '-te',
+            '-180', '-90', '180', '90', source_file, output_file
+        ])
+    else:
+        subprocess.run([
+            'gdalwarp', '-s_srs', 'EPSG:3412', '-t_srs', 'EPSG:4326',
+            source_file, output_file
+        ])
 
 
 def gdalwarp_MODIS_seaice_image(source_file: str, output_file: str):
@@ -29,10 +33,9 @@ def gdalwarp_MODIS_seaice_image(source_file: str, output_file: str):
     ])
 
 
-def amsr2_to_hugin_folder():
-    amsr2_tif_source = set(
-        x for x in os.listdir(SEA_ICE_CONCENTRATION)
-        if x.split('.')[-1] == 'tif' and 'Antarctic_AMSR2' in x)
+def amsr2_antarctic_to_hugin_folder(target_name='Antarctic_AMSR2'):
+    amsr2_tif_source = set(x for x in os.listdir(SEA_ICE_CONCENTRATION)
+                           if x.split('.')[-1] == 'tif' and target_name in x)
     amsr2_tif_target = set(os.listdir(HUGIN_MAPS_AMSR2_SEA_ICE_CONCENTRATION))
 
     for source in tqdm(amsr2_tif_source):
@@ -40,7 +43,9 @@ def amsr2_to_hugin_folder():
             continue
         source_file = os.path.join(SEA_ICE_CONCENTRATION, source)
         output_file = os.path.join('./data/AMSR2', source)
-        gdalwarp_AMSR2_seaice_concentration(source_file, output_file)
+        gdalwarp_AMSR2_seaice_concentration(source_file,
+                                            output_file,
+                                            target_name=target_name)
 
 
 def seaice_modis_data():
