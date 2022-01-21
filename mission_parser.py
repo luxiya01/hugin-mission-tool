@@ -1,5 +1,6 @@
 import base64
 from dataclasses import dataclass
+import pandas as pd
 
 from data import Mission, WayPoint, DepthControlMode, GuidanceMode, SpeedControlMode
 
@@ -17,6 +18,15 @@ class MissionParser:
         for x in lines:
             print(x)
         return cls._parse_content(filename, lines)
+
+    @classmethod
+    def convert_mission_file_to_latlon_csv(cls, filename):
+        mission = cls.parse_file(filename)
+        df = pd.DataFrame()
+        df['lat'] = [x.latitude_in_dd for x in mission.mission]
+        df['lon'] = [x.longitude_in_dd for x in mission.mission]
+        return df.to_csv(f'{filename.split(".")[0]}.csv')
+
 
     @classmethod
     def parse_file(cls, filename):
