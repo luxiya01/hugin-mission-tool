@@ -197,6 +197,8 @@ class Mission:
         the exisiting Waypoint with index. If No is None, append the new waypoint to the end of
         the mission. Note that this method assumes that the vehicle is in speed control mode,
         i.e. it computes the Duration based on the Distance and the current speed."""
+        if index is None:
+            index = self.length - 1
         prev_waypoint = self.mission[index]
         new_lat_str = WayPoint.degree_decimals_to_degree_minutes(lat)
         new_lon_str = WayPoint.degree_decimals_to_degree_minutes(lon)
