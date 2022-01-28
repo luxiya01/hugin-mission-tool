@@ -14,12 +14,10 @@ def parse_ini_file(filepath: str) -> dict:
     ini_params
         A nested dict of the form {section_name: {param_name: param_value}}
     """
-    #TODO: store param values in the appropriate type (e.g. int, float) instead of all str
-
     # section name format: [section name]
     section_name_pattern = re.compile(r'\[(.+)\]')
     # param format: paramName = value  # comments-if-any
-    param_pattern = re.compile(r'([\w\s_-]+)=([\s\w\d]+)\s*(#.+)*')
+    param_pattern = re.compile(r'([\w\s_-]+)=([-\.\s\w\d]+)\s*(#.+)*')
 
     ini_params = {}
     current_section = None
