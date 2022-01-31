@@ -1,10 +1,8 @@
 from enum import Enum
 from dataclasses import dataclass
-from geopy import distance
-from geopy.point import Point
 from typing import List
 from datetime import datetime, timedelta
-from numpy import floor, ceil, arctan2, rad2deg, cos, deg2rad
+from numpy import floor
 
 
 class DepthControlMode(Enum):
@@ -96,14 +94,6 @@ class WayPoint:
     Dur: float = None
     Dist: float = None
     Flags: str = None
-
-    @property
-    def position(self) -> Point:
-        """Returns the target point (latitude, longitude, altitude) of the WayPoint"""
-        #TODO: compute target altitude
-        return Point(latitude=self.latitude_in_dd,
-                     longitude=self.longitude_in_dd,
-                     altitude=None)
 
     @property
     def latitude_in_dd(self) -> float:
