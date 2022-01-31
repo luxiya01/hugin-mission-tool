@@ -121,7 +121,7 @@ class WayPoint:
     @classmethod
     def degree_decimals_to_degree_minutes(cls, dd: float, is_lat=True) -> str:
         """Convert a DD float to DDM string"""
-        degrees = floor(abs(dd))
+        degrees = int(floor(abs(dd)))
         minutes = (abs(dd) - degrees) * 60
 
         minutes_str = f'{minutes:.4f}'
