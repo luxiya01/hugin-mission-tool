@@ -25,7 +25,9 @@ class MissionParser:
     def _parse_content(cls, filename, lines):
         """Parse string content into a mission. Returns a Mission object."""
 
-        mission = Mission(filename=filename, mission=[])
+        mission = Mission(filename=filename,
+                          mission=[],
+                          meta_info=lines[:cls.header_line_idx])
         header = cls._parse_line_content(lines[cls.header_line_idx],
                                          is_header=True)
         mission.header = header
@@ -36,7 +38,7 @@ class MissionParser:
             if len(line.strip().split()) == 0:
                 continue
             if line[0] == '#':
-                comment = line[1:]
+                comment = line[1:].strip()
             else:
                 waypoint = cls._parse_waypoint(line,
                                                header,
