@@ -1,6 +1,7 @@
 import base64
 
-from data import Mission, WayPoint, DepthControlMode, GuidanceMode, SpeedControlMode
+from data import (Mission, WayPoint, DepthControlMode, GuidanceMode,
+                  SpeedControlMode, Course, Duration, Distance)
 
 
 class MissionParser:
@@ -108,10 +109,24 @@ class MissionParser:
         if attr_name in ['Tag', 'Latitude', 'Longitude', 'Flags']:
             return attr_value
 
-        if attr_name in ['Course', 'Dur', 'Dist']:
+        if attr_name == 'Course':
             if attr_value[0] == '(' and attr_value[-1] == ')':
-                return float(attr_value[1:-1])
-            return float(attr_value)
+                return Course(value=float(attr_value[1:-1]),
+                              is_computed_automatically=True)
+            return Course(value=float(attr_value),
+                          is_computed_automatically=False)
+        if attr_name == 'Dur':
+            if attr_value[0] == '(' and attr_value[-1] == ')':
+                return Duration(value=int(attr_value[1:-1]),
+                                is_computed_automatically=True)
+            return Duration(value=int(attr_value),
+                            is_computed_automatically=False)
+        if attr_name == 'Dist':
+            if attr_value[0] == '(' and attr_value[-1] == ')':
+                return Distance(value=int(attr_value[1:-1]),
+                                is_computed_automatically=True)
+            return Distance(value=int(attr_value),
+                            is_computed_automatically=False)
 
         if attr_name in ['Depth', 'Alt', 'RPM', 'Speed']:
             #TODO: handle knot in Speed!
