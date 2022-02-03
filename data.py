@@ -144,7 +144,7 @@ class Mission:
     Corresponds to the content of one .mp mission file.
     """
     filename: str = None
-    meta_info: List[str]
+    meta_info: List[str] = None
     header: List[str] = None
     #TODO: compute longitude and latitude from other waypoint data when they show up as None
     mission: List[WayPoint] = None
