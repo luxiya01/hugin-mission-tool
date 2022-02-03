@@ -30,6 +30,74 @@ class SpeedControlMode(Enum):
 
 
 @dataclass
+class Course:
+    """
+    A class used to represent the course of a Waypoint. Note that the __repr__ is different
+    depending on the bool.
+
+    Parameters
+    ----------
+    value: float
+        The numeric value of the course (0 = north, 180 = south)
+    is_computed_automatically: bool
+        Indicates whether the course is given by user or computed automatically, this controls
+        the __repr__ of the Course object.
+    """
+    value: float
+    is_computed_automatically: bool = False
+
+    def __repr__(self):
+        if self.is_computed_automatically:
+            return f'({int(self.value)})'
+        value_repr = f'{self.value:5.1f}'.replace(' ', '0')
+        return value_repr
+
+
+@dataclass
+class Duration:
+    """
+    A class used to represent the duration (in seconds) of a Waypoint.
+
+    Parameters
+    ----------
+    value: int
+        The numeric value of the duration of a Waypoint in seconds.
+    is_computed_automatically: bool
+        Indicates whether the duration is given by user or computed automatically, this controls
+        the __repr__ of the Course object.
+    """
+    value: int
+    is_computed_automatically: bool = False
+
+    def __repr__(self):
+        if self.is_computed_automatically:
+            return f'({self.value})'
+        return str(self.value)
+
+
+@dataclass
+class Distance:
+    """
+    A class used to represent the distance (in meters) of a Waypoint.
+
+    Parameters
+    ----------
+    value: int
+        The numeric value of the distance required to reach the Waypoint from the previous Waypoint.
+    is_computed_automatically: bool
+        Indicates whether the distance is given by user or computed automatically, this controls
+        the __repr__ of the Course object.
+    """
+    value: int
+    is_computed_automatically: bool = False
+
+    def __repr__(self):
+        if self.is_computed_automatically:
+            return f'({self.value})'
+        return str(self.value)
+
+
+@dataclass
 class WayPoint:
     """
     A class used to represent a WayPoint, corresponds to one line in the .mp mission file
@@ -55,7 +123,7 @@ class WayPoint:
         Target latitude of the WayPoint, given in DDM (degrees decimal minutes)
     Longitude: str
         Target longitude of the WayPoint, given in DDM (degrees decimal minutes).
-    Course: float
+    Course: Course
         Target course/heading (orientation of the AUV relative to North (0 degree)).
         Automatically computed heading, as opposed to user-specified heading, is given in
         parenteses().
@@ -69,14 +137,17 @@ class WayPoint:
         Used if SMo is (SPEED - S).
     SMo: SpeedControlMode Enum
         Indicates the speed control mode.
-    Dur: float
+    Dur: Duration
         Duration of the mission line (from the previous WayPoint in the mission file) in seconds.
         Automatically computed duration (in WAYPOINT mode) is given in parenteses().
-    Dist: float
+    Dist: Distance
         Travel distance of the mission line (from the previous WayPoint in the mission file) in
         meters. Automatically computed distance (in WAYPOINT mode) is given in parenteses().
     Flags: str
         Flags and commands.
+    original_string_representation: str
+        The original string representation of the mission line and the corresponding comments above
+        the line (if any).
     """
     No: int = None
     Comment: str = None
@@ -86,14 +157,18 @@ class WayPoint:
     DMo: DepthControlMode = None
     Latitude: str = None
     Longitude: str = None
-    Course: float = None
+    Course: Course = None
     GMo: GuidanceMode = None
     RPM: float = None
     Speed: float = None
     SMo: SpeedControlMode = None
-    Dur: float = None
-    Dist: float = None
+    Dur: Duration = None
+    Dist: Distance = None
     Flags: str = None
+
+    def __repr__(self): -> str:
+        """Returns a string representation of the Waypoint."""
+
 
     @property
     def latitude_in_dd(self) -> float:
