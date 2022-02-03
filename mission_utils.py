@@ -42,11 +42,17 @@ def add_start_water_sampling_flag_to_mission(filepath: str):
         comment=START_WATER_SAMPLING_COMMENT,
         flag=COMMENT_TO_FLAG[START_WATER_SAMPLING_COMMENT].flag)
 
+    folder = os.path.dirname(filepath)
+    filename = os.path.basename(os.path.normpath(filepath))
+    output_filename = f'{filename.split(".")[0]}_ws.mp'
+    output_filepath = os.path.join(folder, output_filename)
+    with open(output_filepath, 'w') as f:
+        f.writelines('\n'.join(modified_mission))
+
 
 def add_flag_according_to_comment(filepath: str, comment: str, flag: str):
     """Given a mission file, look for lines with the desired comment and add the
-    flag specified to the line. The modified mission is written back to the same
-    folder with a new filename specifying the comment used to add the flag.
+    flag specified to the line.
 
     Parameters
     ----------
@@ -57,6 +63,14 @@ def add_flag_according_to_comment(filepath: str, comment: str, flag: str):
     flag: str
         The string representation of the flag to be added to the mission line under
         the line with the specified comment.
+
+    Returns
+    -------
+    modified_mission: List[str]
+        A list of strings where each one represents one line in the mission plan.
+        Compared to the mission plan from the input (parsed from param filepath),
+        the output modified_mission adds the desired flag to the mission lines below
+        the specified comments.
     """
     comment_str = f'# {comment}'
     add_flag = False
@@ -75,13 +89,7 @@ def add_flag_according_to_comment(filepath: str, comment: str, flag: str):
 
             if comment_str in line:
                 add_flag = True
-
-    folder = os.path.dirname(filepath)
-    filename = os.path.basename(os.path.normpath(filepath))
-    output_filename = f'{filename.split(".")[0]}_add_{comment}_flag.mp'
-    output_filepath = os.path.join(folder, output_filename)
-    with open(output_filepath, 'w') as f:
-        f.writelines('\n'.join(modified_mission))
+    return modified_mission
 
 
 def convert_mission_file_to_latlon_csv(
