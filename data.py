@@ -178,16 +178,10 @@ class WayPoint:
     Dist: Distance = None
     Flags: str = None
 
-    def repr_given_prev_waypoint(self, prev_waypoint: WayPoint) -> str:
-        """Returns the string representation of the Waypoint given the previous waypoint,
-        all properties that are equal to the given waypoint will be represented by = in the
-        resulting string representation."""
-        pass
-
     def __repr__(self) -> str:
         """Returns the string representation of the WayPoint as a single waypoint"""
         waypoint_str = (
-            f':{self.tag_str} {self.Depth:6.1f} {self.Alt:5.1f}  {self.DMo.value} '
+            f':{self.Tag:<8s} {self.Depth:6.1f} {self.Alt:5.1f}  {self.DMo.value} '
             f'{self.latitude_str:>11s} {self.longitude_str:>12s}  {self.Course}  {self.GMo.value}  {self.RPM:4.0f} '
             f'{self.speed_str} {self.SMo.value}  {self.Dur} {self.Dist}')
         if self.Flags:
@@ -195,10 +189,6 @@ class WayPoint:
         if self.Comment:
             waypoint_str = '\n'.join(['', f'# {self.Comment}', waypoint_str])
         return waypoint_str
-
-    @property
-    def tag_str(self) -> str:
-        return f'{self.Tag:<8s}'
 
     @property
     def speed_str(self) -> str:
