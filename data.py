@@ -234,9 +234,9 @@ class Mission:
         """Returns the cumulative time at each mission WayPoint in seconds"""
         mission_time = []  #cumulative time reaching the first WayPoint
         if self.mission is not None:
-            mission_time.append(self.mission[0].Dur)
+            mission_time.append(self.mission[0].Dur.value)
             for m in self.mission[1:]:
-                mission_time.append(mission_time[-1] + m.Dur)
+                mission_time.append(mission_time[-1] + m.Dur.value)
         return mission_time
 
     def compute_mission_timestamps(self,
