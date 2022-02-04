@@ -86,6 +86,12 @@ class MissionParser:
         for attr_name, attr_value in zip(header, content):
             attr = cls._parse_attr(attr_name, attr_value, prev_waypoint)
             setattr(waypoint, attr_name, attr)
+
+        # If the waypoint has an explitic latitude and longitude, then it is in WAYPOINT
+        # GuidanceMode implicitly according to HuginOS documentation... See WayPoint class
+        # docstrings
+        if waypoint.Latitude is not None and waypoint.Longitude is not None:
+            waypoint.GMo = GuidanceMode.WAYPOINT
         return waypoint
 
     @classmethod

@@ -50,7 +50,9 @@ class Course:
         if self.is_computed_automatically:
             val = int(self.value)
             str_val = str(val)
-            if val < 100:
+            if val < 10:
+                str_val = f'00{str(val)}'
+            elif val < 100:
                 str_val = f'0{str(val)}'
             return f'({str_val})'
         value_repr = f'{self.value:5.1f}'.replace(' ', '0')
@@ -157,9 +159,6 @@ class WayPoint:
         meters. Automatically computed distance (in WAYPOINT mode) is given in parenteses().
     Flags: str
         Flags and commands.
-    original_string_representation: str
-        The original string representation of the mission line and the corresponding comments above
-        the line (if any).
     """
     No: int = None
     Comment: str = None
@@ -178,17 +177,96 @@ class WayPoint:
     Dist: Distance = None
     Flags: str = None
 
-    def __repr__(self) -> str:
-        """Returns the string representation of the WayPoint as a single waypoint"""
+    def _depth_equal_str(self, waypoint_char_list: List[str]) -> List[str]:
+        waypoint_char_list[10:16] = list('    = ')
+        return waypoint_char_list
+
+    def _alt_equal_str(self, waypoint_char_list: List[str]) -> List[str]:
+        waypoint_char_list[17:22] = list('   = ')
+        return waypoint_char_list
+
+    def _dmo_equal_str(self, waypoint_char_list: List[str]) -> List[str]:
+        waypoint_char_list[24:25] = list('=')
+        return waypoint_char_list
+
+    def _course_equal_str(self, waypoint_char_list: List[str]) -> List[str]:
+        waypoint_char_list[52:57] = list('   = ')
+        return waypoint_char_list
+
+    def _gmo_equal_str(self, waypoint_char_list: List[str]) -> List[str]:
+        waypoint_char_list[59:60] = list('=')
+        return waypoint_char_list
+
+    def _rpm_equal_str(self, waypoint_char_list: List[str]) -> List[str]:
+        waypoint_char_list[62:66] = list('   =')
+        return waypoint_char_list
+
+    def _speed_equal_str(self, waypoint_char_list: List[str]) -> List[str]:
+        waypoint_char_list[67:72] = list('  =  ')
+        return waypoint_char_list
+
+    def _smo_equal_str(self, waypoint_char_list: List[str]) -> List[str]:
+        waypoint_char_list[74:75] = list('=')
+        return waypoint_char_list
+
+    def _repr_without_comment(self) -> str:
+        """Helper function for __repr__. Returns the string representation of the WayPoint without
+        the comment line."""
         waypoint_str = (
             f':{self.Tag:<8s} {self.Depth:6.1f} {self.Alt:5.1f}  {self.DMo.value} '
-            f'{self.latitude_str:>11s} {self.longitude_str:>12s}  {self.Course}  {self.GMo.value}  {self.RPM:4.0f} '
-            f'{self.speed_str} {self.SMo.value}  {self.Dur} {self.Dist}')
+            f'{self.latitude_str:>11s} {self.longitude_str:>12s}  {self.Course}  {self.gmo_str}  '
+            f'{self.RPM:4.0f} {self.speed_str}  {self.SMo.value} {self.Dur} {self.Dist}'
+        )
         if self.Flags:
             waypoint_str = ' '.join([waypoint_str, self.Flags])
+        return waypoint_str
+
+    def _add_comment_to_str(self, waypoint_str: str) -> str:
+        """Given a string representation of the current waypoint, add the comment line above (if
+        any)"""
         if self.Comment:
             waypoint_str = '\n'.join(['', f'# {self.Comment}', waypoint_str])
         return waypoint_str
+
+    def __repr__(self) -> str:
+        """Returns the string representation of the WayPoint as a single waypoint"""
+        waypoint_str = self._repr_without_comment()
+        waypoint_str = self._add_comment_to_str(waypoint_str)
+        return waypoint_str
+
+    def repr_given_prev_waypoint(self, prev_waypoint) -> str:
+        waypoint_str = self._repr_without_comment()
+
+        waypoint_char_list = list(waypoint_str)
+
+        if self.Depth == prev_waypoint.Depth:
+            waypoint_char_list = self._depth_equal_str(waypoint_char_list)
+        if self.Alt == prev_waypoint.Alt:
+            waypoint_char_list = self._alt_equal_str(waypoint_char_list)
+        if self.DMo == prev_waypoint.DMo:
+            waypoint_char_list = self._dmo_equal_str(waypoint_char_list)
+        if (not self.Course.is_computed_automatically
+                and not prev_waypoint.Course.is_computed_automatically
+                and self.Course.value == prev_waypoint.Course.value):
+            waypoint_char_list = self._course_equal_str(waypoint_char_list)
+        if self.GMo == prev_waypoint.GMo:
+            waypoint_char_list = self._gmo_equal_str(waypoint_char_list)
+        if self.RPM == prev_waypoint.RPM:
+            waypoint_char_list = self._rpm_equal_str(waypoint_char_list)
+        if self.Speed == prev_waypoint.Speed:
+            waypoint_char_list = self._speed_equal_str(waypoint_char_list)
+        if self.SMo == prev_waypoint.SMo:
+            waypoint_char_list = self._smo_equal_str(waypoint_char_list)
+
+        new_waypoint_str = ''.join(waypoint_char_list)
+        new_waypoint_str = self._add_comment_to_str(new_waypoint_str)
+        return new_waypoint_str
+
+    @property
+    def gmo_str(self) -> str:
+        if self.GMo is GuidanceMode.WAYPOINT:
+            return '='
+        return str(self.GMo.value)
 
     @property
     def speed_str(self) -> str:
@@ -288,5 +366,11 @@ class Mission:
 
     def __repr__(self) -> str:
         meta_info_str = ''.join(self.meta_info)
-        mission_str = '\n'.join([str(m) for m in self.mission])
+        mission_str_list = [str(self.mission[0])]
+        mission_str_list.extend([
+            self.mission[i].repr_given_prev_waypoint(self.mission[i - 1])
+            for i in range(1, self.length)
+        ])
+        mission_str_list[-1] = f'{mission_str_list[-1]}\n'
+        mission_str = '\n'.join(mission_str_list)
         return ''.join([meta_info_str, mission_str])
