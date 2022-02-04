@@ -111,7 +111,7 @@ class MissionParser:
 
         if attr_name == 'No' and attr_value == '':
             if prev_waypoint is None:
-                return 0
+                return 1
             return prev_waypoint.No + 1
 
         if attr_name in ['Tag', 'Latitude', 'Longitude', 'Flags']:
