@@ -28,7 +28,7 @@ class MissionParser:
 
         mission = Mission(filename=filename,
                           mission=[],
-                          meta_info=lines[:cls.header_line_idx])
+                          meta_info=lines[:cls.header_line_idx + 2])
         header = cls._parse_line_content(lines[cls.header_line_idx],
                                          is_header=True)
         mission.header = header
@@ -97,8 +97,10 @@ class MissionParser:
             return getattr(prev_waypoint, attr_name)
 
         if attr_value == '-':
-            if attr_name in ['Dur', 'Dist']:
-                return 0
+            if attr_name == 'Dur':
+                return Duration(value=None, is_computed_automatically=False)
+            if attr_name == 'Dist':
+                return Distance(value=None, is_computed_automatically=False)
             return None
 
         if attr_name == 'No' and attr_value == '':
