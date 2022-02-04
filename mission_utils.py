@@ -3,6 +3,9 @@ import pandas as pd
 import os
 from dataclasses import dataclass
 from mission_parser import MissionParser
+from data import Mission
+
+#TODO: add tests for this module!
 
 
 @dataclass
@@ -14,82 +17,57 @@ class Flag:
     ----------
     name: str
         The name of the flag
-    command: str
+    flag: str
         The command/flag used in HuginOS
     explanation: str
-        The meaning of the flag in plain text
+        The comment that this flag corresponds to
     """
     name: str
     flag: str
-    explanation: str
+    comment: str
 
 
-START_WATER_SAMPLING_COMMENT = 'WS'
-START_WATER_SAMPLING_FLAG = Flag(
-    name='start_water_sampling',
-    flag='cmd=9C013C',
-    explanation='Start collecting water sample for one bottle')
-STOP_WATER_SAMPLING_FLAG = Flag(
-    name='stop_water_sampling',
-    flag='cmd=9C012C',
-    explanation='Stop collecting water sample for one bottle')
-COMMENT_TO_FLAG = {START_WATER_SAMPLING_COMMENT: START_WATER_SAMPLING_FLAG}
+START_WATER_SAMPLING = Flag(name='start_water_sampling',
+                            flag='cmd=9C013C',
+                            comment='WS')
+STOP_WATER_SAMPLING = Flag(name='stop_water_sampling',
+                           flag='cmd=9C012C',
+                           comment='')
 
 
-def add_start_water_sampling_flag_to_mission(filepath: str):
-    add_flag_according_to_comment(
-        filepath=filepath,
-        comment=START_WATER_SAMPLING_COMMENT,
-        flag=COMMENT_TO_FLAG[START_WATER_SAMPLING_COMMENT].flag)
+def add_water_sampling_commands(filepath: str) -> (Mission, str):
+    """Given a filepath to a mission plan, add START_WATER_SAMPLING flag to all
+    waypoints with a comment that starts with WS and add STOP_WATER_SAMPLING to
+    the waypoint that directly follows the START_WATER_SAMPLING flag.
+
+    Parameters
+    ----------
+    filepath: str
+        Path to the .mp mission file.
+
+    Returns
+    -------
+    mission: Mission
+        The modified mission object with START_WATER_SAMPLING and STOP_WATER_SAMPLING
+        flags added to the desired lines. The modified mission plan is writtten back
+        to the input folder with _ws appended to the filename.
+    output_filepath: str
+        The output filepath (where the modified mission plan is written back to).
+    """
+    mission = MissionParser.parse_file(filepath)
+    for i in range(mission.length - 1):
+        waypoint = mission.mission[i]
+        if START_WATER_SAMPLING.comment in waypoint.Comment:
+            waypoint.Flags = START_WATER_SAMPLING.flag
+            mission.mission[i + 1].Flags = STOP_WATER_SAMPLING.flag
 
     folder = os.path.dirname(filepath)
     filename = os.path.basename(os.path.normpath(filepath))
     output_filename = f'{filename.split(".")[0]}_ws.mp'
     output_filepath = os.path.join(folder, output_filename)
-    with open(output_filepath, 'w') as f:
-        f.writelines('\n'.join(modified_mission))
-
-
-def add_flag_according_to_comment(filepath: str, comment: str, flag: str):
-    """Given a mission file, look for lines with the desired comment and add the
-    flag specified to the line.
-
-    Parameters
-    ----------
-    filepath: str
-        Path to the .mp file.
-    comment: str
-        The string comment to look for.
-    flag: str
-        The string representation of the flag to be added to the mission line under
-        the line with the specified comment.
-
-    Returns
-    -------
-    modified_mission: List[str]
-        A list of strings where each one represents one line in the mission plan.
-        Compared to the mission plan from the input (parsed from param filepath),
-        the output modified_mission adds the desired flag to the mission lines below
-        the specified comments.
-    """
-    comment_str = f'# {comment}'
-    add_flag = False
-    modified_mission = []
-    with open(filepath, 'r') as f:
-        lines = [l.strip('\n') for l in f.readlines()]
-        for line in lines:
-            modified_line = line
-
-            if add_flag:
-                # separator is used to align the values in the Flag column
-                separator = ' ' if line[-1] == ')' else '  '
-                modified_line = separator.join([line, flag])
-                add_flag = False
-            modified_mission.append(modified_line)
-
-            if comment_str in line:
-                add_flag = True
-    return modified_mission
+    with open(output_filepath, 'w', encoding='utf-8') as f:
+        f.writelines(str(mission))
+    return mission, output_filepath
 
 
 def convert_mission_file_to_latlon_csv(
