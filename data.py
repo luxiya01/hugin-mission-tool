@@ -48,7 +48,11 @@ class Course:
 
     def __repr__(self):
         if self.is_computed_automatically:
-            return f'({int(self.value)})'
+            val = int(self.value)
+            str_val = str(val)
+            if val < 100:
+                str_val = f'0{str(val)}'
+            return f'({str_val})'
         value_repr = f'{self.value:5.1f}'.replace(' ', '0')
         return value_repr
 
@@ -71,8 +75,12 @@ class Duration:
 
     def __repr__(self):
         if self.is_computed_automatically:
-            return f'({self.value})'
-        return str(self.value)
+            str_val = f'({self.value})'
+            return f'{str_val:>6s}'
+        if not self.value:
+            return '     -'
+        str_val = str(self.value)
+        return f'{str_val:>6s}'
 
 
 @dataclass
@@ -93,8 +101,12 @@ class Distance:
 
     def __repr__(self):
         if self.is_computed_automatically:
-            return f'({self.value})'
-        return str(self.value)
+            str_val = f'({self.value})'
+            return f'{str_val:>7s}'
+        if not self.value:
+            return '     - '
+        str_val = str(self.value)
+        return f'{str_val:>6s} '
 
 
 @dataclass
@@ -166,9 +178,41 @@ class WayPoint:
     Dist: Distance = None
     Flags: str = None
 
-    def __repr__(self): -> str:
-        """Returns a string representation of the Waypoint."""
+    def repr_given_prev_waypoint(self, prev_waypoint: WayPoint) -> str:
+        """Returns the string representation of the Waypoint given the previous waypoint,
+        all properties that are equal to the given waypoint will be represented by = in the
+        resulting string representation."""
+        pass
 
+    def __repr__(self) -> str:
+        """Returns the string representation of the WayPoint as a single waypoint"""
+        waypoint_str = (
+            f':{self.tag_str} {self.Depth:6.1f} {self.Alt:5.1f}  {self.DMo.value} '
+            f'{self.latitude_str:>11s} {self.longitude_str:>12s}  {self.Course}  {self.GMo.value}  {self.RPM:4.0f} '
+            f'{self.speed_str} {self.SMo.value}  {self.Dur} {self.Dist}')
+        if self.Flags:
+            waypoint_str = ' '.join([waypoint_str, self.Flags])
+        if self.Comment:
+            waypoint_str = '\n'.join(['', f'# {self.Comment}', waypoint_str])
+        return waypoint_str
+
+    @property
+    def tag_str(self) -> str:
+        return f'{self.Tag:<8s}'
+
+    @property
+    def speed_str(self) -> str:
+        if not self.Speed:
+            return '  =  '
+        return f'{self.Speed:5.2f}'
+
+    @property
+    def latitude_str(self) -> str:
+        return '-' if not self.Latitude else self.Latitude
+
+    @property
+    def longitude_str(self) -> str:
+        return '-' if not self.Longitude else self.Longitude
 
     @property
     def latitude_in_dd(self) -> float:
@@ -251,3 +295,8 @@ class Mission:
             for t in self.cumulative_mission_time
         ]
         return timestamps
+
+    def __repr__(self) -> str:
+        meta_info_str = ''.join(self.meta_info)
+        mission_str = '\n'.join([str(m) for m in self.mission])
+        return ''.join([meta_info_str, mission_str])
