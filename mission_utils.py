@@ -7,6 +7,9 @@ from data import Mission, WayPoint
 from flags import START_WATER_SAMPLING, STOP_WATER_SAMPLING
 from utils import utc_time_str_to_unixtime
 
+#TODO: refactor into a mission_folder class?
+#TODO: add tests
+
 
 def get_lat_lon_depth_from_vehicle_ctd(
         vehicle_ctd: pd.DataFrame,
