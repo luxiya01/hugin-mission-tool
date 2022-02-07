@@ -165,6 +165,8 @@ def parse_water_sample_locations_and_time(mission_folder: str,
 
         if waypoint.Flags == START_WATER_SAMPLING.flag:
             ws_match = re.search(ws_pattern, waypoint.Comment)
+            print(waypoint.Comment)
+            print(waypoint)
             ws_id = waypoint.Comment[ws_match.start():ws_match.end()]
 
             prev_waypoint_nr = prev_waypoint.No

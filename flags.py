@@ -23,7 +23,7 @@ class Flag:
 
 START_WATER_SAMPLING = Flag(name='start_water_sampling',
                             flag='cmd=9C013C',
-                            comment=r'WS ?\d+')
+                            comment=r'[wW][sS] *\d+')
 STOP_WATER_SAMPLING = Flag(name='stop_water_sampling',
                            flag='cmd=9C012C',
                            comment='')
