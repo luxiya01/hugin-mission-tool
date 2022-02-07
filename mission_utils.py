@@ -1,3 +1,4 @@
+import time
 import datetime
 import pandas as pd
 import os
@@ -139,7 +140,66 @@ def parse_cp_events(cp_event_path: str) -> pd.DataFrame:
 
 def parse_water_sample_locations_and_time(mission_folder: str,
                                           save: bool = True) -> pd.DataFrame:
-    pass
+    time_fmt = '%Y.%m.%d %H:%M:%S'
+    ws_duration = 60 * 5  # 300 seconds (5 minutes)
+    ws_data = []
+
+    # Load mission plan
+    mp_path = os.path.join(mission_folder, 'mission.mp')
+    mission_plan = MissionParser.parse_file(mp_path)
+
+    # Load vehicleCTD
+    vehicle_ctd_path = os.path.join(mission_folder, 'env/ctd/VehicleCTD.txt')
+    vehicle_ctd = vehicle_ctd_to_df(vehicle_ctd_path)
+
+    # Parse CP-Events
+    cp_event_path = os.path.join(mission_folder, 'cp/EventLog/CP-Events.txt')
+    cp_event_df = parse_cp_events(cp_event_path)
+
+    # Water sampling tags
+    ws_pattern = re.compile(START_WATER_SAMPLING.comment)
+
+    for i in range(1, mission_plan.length):
+        prev_waypoint = mission_plan.mission[i - 1]
+        waypoint = mission_plan.mission[i]
+
+        if waypoint.Flags == START_WATER_SAMPLING.flag:
+            ws_match = re.search(ws_pattern, waypoint.Comment)
+            ws_id = waypoint.Comment[ws_match.start():ws_match.end()]
+
+            prev_waypoint_nr = prev_waypoint.No
+            lat_from_mp = prev_waypoint.latitude_in_dd
+            lon_from_mp = prev_waypoint.longitude_in_dd
+
+            # ws_start_time = the time reaching prev_waypoint
+            ws_start_time = cp_event_df[cp_event_df.waypoint_nr ==
+                                        prev_waypoint_nr].unixtime.iloc[0]
+            time_str = time.strftime(time_fmt, time.gmtime(ws_start_time))
+            ctd_lat, ctd_lon, ctd_depth = get_lat_lon_depth_from_vehicle_ctd(
+                vehicle_ctd, ws_start_time)
+            ws_data.append([
+                f'{ws_id} start', time_str, lat_from_mp, lon_from_mp, ctd_lat,
+                ctd_lon, ctd_depth
+            ])
+
+            ws_end_time = ws_start_time + ws_duration
+            time_str = time.strftime(time_fmt, time.gmtime(ws_end_time))
+            ctd_lat, ctd_lon, ctd_depth = get_lat_lon_depth_from_vehicle_ctd(
+                vehicle_ctd, ws_end_time)
+            ws_data.append([
+                f'{ws_id} end', time_str, lat_from_mp, lon_from_mp, ctd_lat,
+                ctd_lon, ctd_depth
+            ])
+
+    df = pd.DataFrame(ws_data,
+                      columns=[
+                          'name', 'timestamp (UTC)', 'lat_from_mp',
+                          'lon_from_mp', 'ctd_lat', 'ctd_lon', 'ctd_depth'
+                      ])
+    if save:
+        mission_name = os.path.basename(os.path.normpath(mission_folder))
+        df.to_csv(f'{mission_name}_water_sample_locations.csv', index=False)
+    return df
 
 
 def parse_mission_data_for_waypoint_locations_and_time(mission_folder: str,
