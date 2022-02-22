@@ -10,6 +10,37 @@ from utils import utc_time_str_to_unixtime
 
 #TODO: refactor into a mission_folder class?
 #TODO: add tests
+#TODO: move time_fmt into consts
+
+def get_mission_start_end_time_and_duration_from_df(filepath: str) -> (str, str, float):
+    """Given the filepath to a csv file created by the function
+    parse_mission_data_for_waypoint_locations_and_time, return the start and end time in
+    UTC and the total mission duration.
+
+    Parameters
+    ----------
+    filepath: str
+        The filepath to the csv file created by the function
+        parse_mission_data_for_waypoint_locations_and_time
+
+    Returns
+    -------
+    start_time: str
+        Mission start time stamp (UTC)
+    end_time: str
+        Mission end time stamp (UTC)
+    dt: float
+        Mission duration in hours
+    """
+    time_fmt = '%Y.%m.%d %H:%M:%S'
+    df = pd.read_csv(filepath)
+    timestamps = df['timestamp (UTC)']
+    start_time = timestamps[0]
+    end_time = timestamps[df.shape[0]-2] # use the recovery_start time (nose cone release)
+    dt = datetime.datetime.strptime(end_time, time_fmt) - datetime.datetime.strptime(start_time,
+            time_fmt)
+    dt = dt.total_seconds()/3600
+    return start_time, end_time, dt
 
 
 def get_lat_lon_depth_from_vehicle_ctd(
@@ -140,6 +171,27 @@ def parse_cp_events(cp_event_path: str) -> pd.DataFrame:
 
 def parse_water_sample_locations_and_time(mission_folder: str,
                                           save: bool = True) -> pd.DataFrame:
+    """Given the path to the mission_folder containing all Hugin data from a mission,
+    parse the time and location for the start and end point for each water samples
+    using the following information:
+        - mission plan: mission_folder/mission.mp
+        - CP (control processor) events: mission_folder/cp/EventLog/CP-Events.txt
+        - Hugin's CTD data: mission_folder/env/ctd/VehicleCTD.txt
+
+    Parameters
+    ----------
+    mission_folder: str
+        Path to the folder containing Hugin mission data
+    save: Bool
+        If true, the resulting pd.DataFrame will be stored to the current directory, i.e.
+        the directory where the script is run, under the name mission_folder_water_sample_locations.csv
+
+    Returns
+    -------
+    df: pd.DataFrame
+        A dataframe containing the following information:
+        [name,timestamp (UTC),lat_from_mp,lon_from_mp,ctd_lat,ctd_lon,ctd_depth]
+    """
     time_fmt = '%Y.%m.%d %H:%M:%S'
     ws_duration = 60 * 5  # 300 seconds (5 minutes)
     ws_data = []
